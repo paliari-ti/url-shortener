@@ -27,6 +27,10 @@ app.get('/:id', (req, res) => {
 })
 
 app.post('/', (req, res) => {
+  if (req.body.token != process.env.API_TOKEN) {
+    res.status(401).send('Unauthorized')
+    return
+  }
   const id = newId()
   redisClient.set(id, req.body.url, redis.print)
   res

@@ -1,14 +1,5 @@
 version: '3.1'
 services:
-  redis:
-    container_name: redis
-    image: redis
-    restart: always
-    ports:
-      - 6379:6379
-    volumes:
-      - ./redis/data:/data
-    entrypoint: redis-server --appendonly yes
   app:
     container_name: url_shortener
     build: .
@@ -19,9 +10,7 @@ services:
       - 3000:3000
     environment:
       API_ENDPOINT: 'http://localhost:3000'
-      # API_TOKEN: 'daniel'
-    depends_on:
-      - redis
-    links:
-      - redis
+      FIREBASE_SERVICE_ACCOUNT: './serviceAccount.json'
+      FIREBASE_DATABASE_URL: 'https://url-shortener-7aacf.firebaseio.com'
+      API_TOKEN: 'my-token'
     command: sh -c './node_modules/.bin/pm2 start ./server.js --watch --no-daemon'

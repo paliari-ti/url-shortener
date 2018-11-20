@@ -1,0 +1,21 @@
+version: '3.1'
+services:
+  redis:
+    container_name: redis
+    image: redis
+    ports:
+      - 6379:6379
+  app:
+    container_name: url_shortener
+    build: .
+    volumes:
+      - ./server.js:/app/server.js
+    ports:
+      - 3000:3000
+    environment:
+      API_ENDPOINT: 'http://localhost:3000'
+    depends_on:
+      - redis
+    links:
+      - redis
+    command: sh -c './node_modules/.bin/pm2 start ./server.js --watch --no-daemon'

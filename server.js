@@ -5,7 +5,7 @@ app.use(bodyParser.json())
 
 // Firebase
 var admin = require('firebase-admin')
-var serviceAccount = require(process.env.FIREBASE_SERVICE_ACCOUNT)
+var serviceAccount = require('./serviceAccount.json')
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: process.env.FIREBASE_DATABASE_URL

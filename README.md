@@ -7,9 +7,10 @@ Use the `docker-compose.yml` as template
 You must provide these environment variables
 
 - **API_ENDPOINT**: Your server host `http://server.com`
-- **FIREBASE_SERVICE_ACCOUNT**: A json with the credentials found in your firebase service account page
 - **FIREBASE_DATABASE_URL**: Your firebase database url
 - **API_TOKEN**: A custom token if your like to protect urls generation
+
+Pass your `serviceAccount.json` as volume to `/app/serviceAccount.json`. Ex: `./serviceAccount.json:/app/serviceAccount.json`
 
 Then run `docker-compose up -d`
 

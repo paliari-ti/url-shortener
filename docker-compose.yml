@@ -6,9 +6,10 @@ services:
     restart: always
     ports:
       - 3000:3000
+    volumes:
+      - ./serviceAccount.json:/app/serviceAccount.json
     environment:
       API_ENDPOINT: 'http://your-host.com'
-      FIREBASE_SERVICE_ACCOUNT: './firebaseServiceAccount.json'
       FIREBASE_DATABASE_URL: 'https://url-shortener.firebaseio.com'
       API_TOKEN: 'my-token'
     command: sh -c './node_modules/.bin/pm2 start ./server.js --watch --no-daemon'

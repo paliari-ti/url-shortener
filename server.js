@@ -18,11 +18,12 @@ const { newId } = require('./idGenerator')
 const collectionRef = firestore.collection('links')
 
 app.get('/', (req, res) => {
-  res.send(
-    `Usage: GET ${process.env.API_ENDPOINT}/:id | POST ${
+  res.type('json').send({
+    get: `${process.env.API_ENDPOINT}/:id`,
+    post: `${
       process.env.API_ENDPOINT
     }/:client_id with url and token in the body`
-  )
+  })
 })
 
 app.get('/:id', (req, res) => {
@@ -37,7 +38,10 @@ app.get('/:id', (req, res) => {
       res.redirect(data.url)
     })
     .catch(() => {
-      res.send('Url not found')
+      res
+        .status(404)
+        .type('json')
+        .send({ error: 'Url not found' })
     })
 })
 
@@ -47,7 +51,10 @@ app.post('/:client_id', async (req, res) => {
     const url = req.body.url
     const client = await getClient(client_id)
     if (!(await isAuthenticated(client, req.body.token))) {
-      res.status(401).send('Unauthorized')
+      res
+        .status(401)
+        .type('json')
+        .send({ error: 'Unauthorized' })
       return
     }
     incrementClient(INCREMENT_TYPES.posts, client_id)
@@ -58,11 +65,12 @@ app.post('/:client_id', async (req, res) => {
       id = newId()
       await collectionRef.doc(id).set({ url, client_id })
     }
-    res
-      .type('application/json')
-      .send({ id, url: `${process.env.API_ENDPOINT}/${id}` })
+    res.type('json').send({ id, url: `${process.env.API_ENDPOINT}/${id}` })
   } catch (error) {
-    res.send('Ops, something went wrong ' + error.message)
+    res
+      .status(500)
+      .type('json')
+      .send({ error: 'Ops, something went wrong' })
   }
 })
 

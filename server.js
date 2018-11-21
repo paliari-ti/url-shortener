@@ -3,21 +3,19 @@ const app = require('express')()
 const bodyParser = require('body-parser')
 app.use(bodyParser.json())
 
-// Firebase
-var admin = require('firebase-admin')
-var serviceAccount = require('./serviceAccount.json')
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: process.env.FIREBASE_DATABASE_URL
-})
-const collectionRef = admin.firestore().collection('links')
+// Firestore
+const { firestore } = require('./firestore')
+const { isAuthenticated } = require('./auth')
+const { newId } = require('./idGenerator')
 
-const newId = () => {
-  return Date.now().toString(36) + Math.floor(Math.random() * 999).toString(36)
-}
+const collectionRef = firestore.collection('links')
 
 app.get('/', (req, res) => {
-  res.send(`Usage: ${process.env.API_ENDPOINT}/:id`)
+  res.send(
+    `Usage: GET ${process.env.API_ENDPOINT}/:id | POST ${
+      process.env.API_ENDPOINT
+    }/:client_id with url and token in the body`
+  )
 })
 
 app.get('/:id', (req, res) => {
@@ -34,9 +32,8 @@ app.get('/:id', (req, res) => {
     })
 })
 
-app.post('/', (req, res) => {
-  const t1 = Date.now()
-  if (req.body.token != process.env.API_TOKEN) {
+app.post('/:client_id', async (req, res) => {
+  if (!(await isAuthenticated(req.params['client_id'], req.body.token))) {
     res.status(401).send('Unauthorized')
     return
   }
@@ -45,13 +42,12 @@ app.post('/', (req, res) => {
     .doc(id)
     .set({ url: req.body.url })
     .then(() => {
-      const t2 = Date.now()
       res
         .type('application/json')
-        .send({ id, url: `${process.env.API_ENDPOINT}/${id}`, time: t2 - t1 })
+        .send({ id, url: `${process.env.API_ENDPOINT}/${id}` })
     })
     .catch(e => {
-      response.send('Ops, something went wrong')
+      res.send('Ops, something went wrong')
     })
 })
 

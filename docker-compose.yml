@@ -11,5 +11,4 @@ services:
     environment:
       API_ENDPOINT: 'http://your-host.com'
       FIREBASE_DATABASE_URL: 'https://url-shortener.firebaseio.com'
-      API_TOKEN: 'my-token'
     command: sh -c './node_modules/.bin/pm2 start ./server.js --watch --no-daemon'

@@ -18,7 +18,7 @@ Then run `docker-compose up -d`
 
 ### Generate a url
 
-`curl -X POST http://server.com -H "Content-Type:application/json" --data '{"url":"https://google.com", "token": "custom-token-if-required"}'`
+`curl -X POST http://server.com/:client_id -H "Content-Type:application/json" --data '{"url":"https://google.com", "token": "custom-token-if-required"}'`
 
 Response
 

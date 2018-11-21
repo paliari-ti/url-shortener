@@ -6,7 +6,9 @@ app.use(bodyParser.json())
 // Firestore
 const { firestore } = require('./firestore')
 const {
+  getClient,
   isAuthenticated,
+  getIdFromUrl,
   incrementUrl,
   incrementClient,
   INCREMENT_TYPES
@@ -40,24 +42,28 @@ app.get('/:id', (req, res) => {
 })
 
 app.post('/:client_id', async (req, res) => {
-  const client_id = req.params['client_id']
-  if (!(await isAuthenticated(client_id, req.body.token))) {
-    res.status(401).send('Unauthorized')
-    return
+  try {
+    const client_id = req.params['client_id']
+    const url = req.body.url
+    const client = await getClient(client_id)
+    if (!(await isAuthenticated(client, req.body.token))) {
+      res.status(401).send('Unauthorized')
+      return
+    }
+    incrementClient(INCREMENT_TYPES.posts, client_id)
+
+    let id = null
+    if (client.unique_url) id = await getIdFromUrl(client_id, url)
+    if (!id) {
+      id = newId()
+      await collectionRef.doc(id).set({ url, client_id })
+    }
+    res
+      .type('application/json')
+      .send({ id, url: `${process.env.API_ENDPOINT}/${id}` })
+  } catch (error) {
+    res.send('Ops, something went wrong ' + error.message)
   }
-  incrementClient(INCREMENT_TYPES.posts, client_id)
-  const id = newId()
-  collectionRef
-    .doc(id)
-    .set({ url: req.body.url, client_id })
-    .then(() => {
-      res
-        .type('application/json')
-        .send({ id, url: `${process.env.API_ENDPOINT}/${id}` })
-    })
-    .catch(e => {
-      res.send('Ops, something went wrong')
-    })
 })
 
 app.listen(3000, () => console.log('Server running'))

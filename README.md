@@ -8,7 +8,6 @@ You must provide these environment variables
 
 - **API_ENDPOINT**: Your server host `http://server.com`
 - **FIREBASE_DATABASE_URL**: Your firebase database url
-- **API_TOKEN**: A custom token if your like to protect urls generation
 
 Pass your `serviceAccount.json` as volume to `/app/serviceAccount.json`. Ex: `./serviceAccount.json:/app/serviceAccount.json`
 

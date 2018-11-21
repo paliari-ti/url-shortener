@@ -5,7 +5,7 @@ app.use(bodyParser.json())
 
 // Firestore
 const { firestore } = require('./firestore')
-const { isAuthenticated } = require('./auth')
+const { isAuthenticated, increment, INCREMENT_TYPES } = require('./helpers')
 const { newId } = require('./idGenerator')
 
 const collectionRef = firestore.collection('links')
@@ -25,6 +25,7 @@ app.get('/:id', (req, res) => {
     .get()
     .then(doc => {
       const data = doc.data()
+      increment(INCREMENT_TYPES.gets, data.client_id)
       res.redirect(data.url)
     })
     .catch(() => {
@@ -33,14 +34,16 @@ app.get('/:id', (req, res) => {
 })
 
 app.post('/:client_id', async (req, res) => {
-  if (!(await isAuthenticated(req.params['client_id'], req.body.token))) {
+  const client_id = req.params['client_id']
+  if (!(await isAuthenticated(client_id, req.body.token))) {
     res.status(401).send('Unauthorized')
     return
   }
+  increment(INCREMENT_TYPES.posts, client_id)
   const id = newId()
   collectionRef
     .doc(id)
-    .set({ url: req.body.url })
+    .set({ url: req.body.url, client_id })
     .then(() => {
       res
         .type('application/json')

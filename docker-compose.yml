@@ -1,14 +1,26 @@
 version: '3.1'
 services:
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
   app:
     container_name: url_shortener
-    image: dflourusso/url-shortener
+    # image: dflourusso/url-shortener
+    build: .
     restart: always
     ports:
       - 3000:3000
     volumes:
-      - ./serviceAccount.json:/app/serviceAccount.json
+      # - ./serviceAccount.json:/app/serviceAccount.json
+      - ./server.js:/app/server.js
+      - ./mongo.js:/app/mongo.js
     environment:
-      API_ENDPOINT: 'http://your-host.com'
-      FIREBASE_DATABASE_URL: 'https://url-shortener.firebaseio.com'
+      API_ENDPOINT: 'http://localhost:3000'
+    depends_on:
+      - mongo
+    links:
+      - mongo
     command: sh -c './node_modules/.bin/pm2 start ./server.js --watch --no-daemon'
